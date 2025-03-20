@@ -87,9 +87,6 @@
 <body>
     <div class="container">
         <h1>Study Information and Consent</h1>
-
-        <!-- Test server button -->
-        <button onclick="testServer()">Test Server Connection</button>
         
         <!-- Study description container -->
         <div id="study-description" class="study-description">
@@ -123,21 +120,6 @@
     </div>
 
     <script>
-        // Test server connection
-        function testServer() {
-            console.log('Testing server connection...');
-            fetch('/api/test')
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Server response:', data);
-                    alert('Server connection successful!');
-                })
-                .catch(error => {
-                    console.error('Server test failed:', error);
-                    alert('Server connection failed: ' + error.message);
-                });
-        }
-
         // Load study description
         document.addEventListener('DOMContentLoaded', function() {
             const studyDescription = document.getElementById('study-description');
