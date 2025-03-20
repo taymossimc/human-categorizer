@@ -1,6 +1,8 @@
 # Human Categorizer
 
-A web application for human-assisted categorization of chatbot messages. This tool allows researchers to gather human judgments for message classification, helping to improve chatbot response systems and message categorization algorithms.
+A web application for human-assisted categorization of chatbot messages. This tool allows researchers to gather human judgments for message classification, helping to improve chatbot response systems and message categorization algorithms.  This version is written for development on your localhost, but of coures it can be easily adapted to run on a Linux-based virtual machine.
+
+Our team is providing this under the terms of CC-BY-NC. Which means that you are free to use it for non-commercial purposes. And we'd like credit if you use it or adapt it.
 
 ## Overview
 
@@ -55,43 +57,45 @@ This application provides:
 
 1. Participants visit the index page and enter their participant code (if provided)
 2. New participants without a code will be directed to the signup page
-3. After signup/login, participants are presented with messages to categorize
+3. After signup/login, participants are presented with messages to categorize. They also assign a confidence score to their categorization
 4. Results are stored and can be downloaded by researchers
 
 ### Researcher Tools
 
 Researchers can:
-- Upload JSON logs of chatbot conversations for analysis
-- Define categories for classification
+- Upload CSV logs of chatbot conversations for analysis
+- Define categories for classification (as CSV)
 - Export results in CSV format
-- Track participant progress
+- Track participant consent and progress
 
 ## File Formats
 
-### Input JSON Structure
+### Corpus (your messages)
 
-The application accepts JSON files with the following structure:
-```json
-{
-  "chatbotId": "...",
-  "chatbotName": "...",
-  "conversations": [
-    {
-      "messages": [
-        {
-          "content": "...",
-          "role": "..."
-        }
-      ]
-    }
-  ]
-}
-```
+The application accepts CSV files with the following format.
+For corpus.csv
 
-### Output CSV Structure
+msg_id,role,content
+1,user,"How do I reset my password? I've tried multiple times but I'm not receiving the reset email."
+
+### Categories (categories expected)
+
+The application accepts CSV files with the following format.
+For categories.csv
+
+category_id,name,description
+1,Support,Questions or issues related to technical problems with devices or software
+
+
+### Output CSV
 
 Results are saved in CSV format with categorization data from participants.
 
+msg_id,participant_id,category_id,confidence_score,timestamp 
+1,WZ81PR,3,3,2025-03-18T21:49:24.000Z
+
 ## Contact
 
-For questions about this study, please contact: imc@tucc.ca 
+For questions about this software or the study that created it, please contact: 
+Tay Moss
+imc@tucc.ca 
