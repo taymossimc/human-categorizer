@@ -75,24 +75,26 @@ Researchers can:
 The application accepts CSV files with the following format.
 For corpus.csv
 
+   ```
 msg_id,role,content
 1,user,"How do I reset my password? I've tried multiple times but I'm not receiving the reset email."
-
+   ```
 ### Categories (categories expected)
 
 The application accepts CSV files with the following format.
 For categories.csv
-
+   ```
 category_id,name,description
 1,Support,Questions or issues related to technical problems with devices or software
-
+   ```
 
 ### Output CSV
 
 Results are saved in CSV format with categorization data from participants.
-
+   ```
 msg_id,participant_id,category_id,confidence_score,timestamp 
 1,WZ81PR,3,3,2025-03-18T21:49:24.000Z
+   ```
 
 ## Contact
 
