@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message Categorization Experiment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 30px;
+        }
+        .description {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .progress-container {
+            margin: 20px 0;
+        }
+        .progress-bar {
+            width: 100%;
+            background-color: #f0f0f0;
+            padding: 3px;
+            border-radius: 3px;
+            margin: 10px 0;
+        }
+        .progress {
+            width: 0%;
+            height: 20px;
+            background-color: #4CAF50;
+            border-radius: 2px;
+            transition: width 0.3s ease-in-out;
+        }
+        .message-box {
+            background-color: #f1f1f1;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 5px solid #4CAF50;
+        }
+        .categories-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .category-tile {
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .category-tile:hover {
+            border-color: #4CAF50;
+            background-color: #f9f9f9;
+        }
+        .category-tile.selected {
+            border-color: #4CAF50;
+            background-color: #e6f7e6;
+        }
+        .confidence-container {
+            margin: 25px 0;
+        }
+        .slider-container {
+            margin-top: 10px;
+        }
+        input[type="range"] {
+            width: 100%;
+        }
+        .confidence-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .thank-you {
+            display: none;
+            text-align: center;
+            padding: 40px 0;
+        }
+        .message-count {
+            text-align: right;
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Message Categorization</h1>
+        
+        <div class="progress-bar">
+            <div id="progress" class="progress"></div>
+        </div>
+        <div class="message-count">
+            Message: <span id="current-message">0</span>/15
+        </div>
+
+        <div id="message-container" class="message-box">
+            <p id="current-text"></p>
+        </div>
+
+        <div id="categories-container" class="categories">
+            <!-- Categories will be populated here -->
+        </div>
+
+        <div class="confidence-section">
+            <p>How confident are you in your categorization?</p>
+            <input type="range" id="confidence" min="1" max="100" value="50">
+            <div class="confidence-labels">
+                <span>Not confident</span>
+                <span>Very confident</span>
+            </div>
+        </div>
+
+        <button id="submit-btn" onclick="submitResponse()">Submit</button>
+    </div>
+
+    <script>
+        let messages = [];
+        let currentMessageIndex = 0;
+        let categories = [];
+        let participantId = '';
+
+        // Get participant ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        participantId = urlParams.get('participant');
+
+        if (!participantId) {
+            window.location.href = 'index.html';
+        }
+
+        // Fetch messages and categories when page loads
+        async function initialize() {
+            try {
+                // Fetch messages from new API endpoint
+                const messagesResponse = await fetch('/api/messages');
+                if (!messagesResponse.ok) throw new Error('Failed to fetch messages');
+                messages = await messagesResponse.json();
+
+                // Fetch categories
+                const categoriesResponse = await fetch('/api/categories');
+                if (!categoriesResponse.ok) throw new Error('Failed to fetch categories');
+                categories = await categoriesResponse.json();
+
+                // Display first message and categories
+                displayMessage();
+                displayCategories();
+            } catch (error) {
+                console.error('Initialization error:', error);
+                alert('Error loading experiment data. Please refresh the page.');
+            }
+        }
+
+        function displayMessage() {
+            const messageElement = document.getElementById('current-text');
+            const currentMessage = messages[currentMessageIndex];
+            messageElement.textContent = currentMessage.content;
+            
+            // Update progress
+            const progress = ((currentMessageIndex + 1) / 15) * 100;
+            document.getElementById('progress').style.width = `${progress}%`;
+            document.getElementById('current-message').textContent = currentMessageIndex + 1;
+        }
+
+        // Global variable to store the currently selected category
+        let selectedCategoryId = null;
+
+        function displayCategories() {
+            const container = document.getElementById('categories-container');
+            container.className = 'categories-container';
+            
+            // Log the categories to check their structure
+            console.log('Categories:', categories);
+
+            // Create the tiles HTML
+            container.innerHTML = categories.map(category => {
+                // Log each category to ensure it has an id
+                console.log('Category:', category);
+                return `
+                    <div class="category-tile" onclick="selectCategory(${category.id}, this)">
+                        <h3>${category.name}</h3>
+                        <p>${category.description}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update the selectCategory function to handle number IDs
+        function selectCategory(categoryId, element) {
+            // Check if categoryId is defined
+            if (categoryId === undefined) {
+                console.error('Category ID is undefined');
+                return; // Exit the function if categoryId is not valid
+            }
+
+            // Remove selected class from all tiles
+            document.querySelectorAll('.category-tile').forEach(tile => {
+                tile.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked tile
+            element.classList.add('selected');
+            
+            // Store the selected category ID in the global variable
+            // Convert to string to ensure consistent type
+            selectedCategoryId = categoryId.toString();
+            console.log('Selected category ID:', selectedCategoryId);
+        }
+
+        async function submitResponse() {
+            try {
+                // Check if a category is selected using the global variable
+                if (!selectedCategoryId) {
+                    alert('Please select a category');
+                    return;
+                }
+
+                const confidenceScore = document.getElementById('confidence').value;
+                const currentMessage = messages[currentMessageIndex];
+
+                // Log the data being sent to help debug
+                const requestData = {
+                    msg_id: currentMessage.msg_id,
+                    participant_id: participantId,
+                    category_id: selectedCategoryId,
+                    confidence_score: confidenceScore,
+                    timestamp: new Date().toISOString()
+                };
+                
+                console.log('Submitting response data:', requestData);
+
+                const response = await fetch('/api/save-response', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Server returned ${response.status}: ${errorText}`);
+                }
+
+                // Reset selection
+                document.querySelectorAll('.category-tile').forEach(t => {
+                    t.classList.remove('selected');
+                });
+                selectedCategoryId = null;  // Reset the selected category
+                document.getElementById('confidence').value = 50;  // Reset to middle value
+
+                // Move to next message or complete experiment
+                currentMessageIndex++;
+                
+                if (currentMessageIndex < 15) {
+                    displayMessage();
+                } else {
+                    await completeExperiment();
+                }
+            } catch (error) {
+                console.error('Error submitting response:', error);
+                alert(`Error saving response: ${error.message}. Please try again.`);
+            }
+        }
+
+        async function completeExperiment() {
+            try {
+                console.log('Completing experiment for participant:', participantId);
+                const response = await fetch('/api/complete-experiment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        participant_id: participantId,
+                        timestamp_end: new Date().toISOString()
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Server returned ${response.status}: ${errorText}`);
+                }
+
+                // Redirect to completion page
+                window.location.href = 'completion.html';
+            } catch (error) {
+                console.error('Error completing experiment:', error);
+                alert(`Error completing experiment: ${error.message}. Please contact the administrator.`);
+            }
+        }
+
+        // Initialize the page
+        initialize();
+    </script>
+</body>
+</html> 

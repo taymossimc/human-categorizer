@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Information and Consent</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 30px;
+        }
+        .study-description {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"],
+        input[type="email"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .consent-section {
+            margin: 30px 0;
+            padding: 15px;
+            border: 2px solid #4CAF50;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .consent-checkbox-container {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .consent-checkbox-container input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            accent-color: #4CAF50;
+        }
+        .consent-checkbox-container label {
+            font-size: 16px;
+            color: #333;
+            line-height: 1.4;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .error {
+            color: red;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid red;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Study Information and Consent</h1>
+
+        <!-- Test server button -->
+        <button onclick="testServer()">Test Server Connection</button>
+        
+        <!-- Study description container -->
+        <div id="study-description" class="study-description">
+            <p>Loading study description...</p>
+        </div>
+        
+        <div class="form-container">
+            <h2>Sign Up to Participate</h2>
+            
+            <form id="signup-form" onsubmit="signUp(event)">
+                <div class="form-group">
+                    <label for="full-name">Full Name:</label>
+                    <input type="text" id="full-name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address:</label>
+                    <input type="email" id="email" required>
+                </div>
+                
+                <div class="consent-section">
+                    <div class="consent-checkbox-container">
+                        <input type="checkbox" id="consent" name="consent" required>
+                        <label for="consent"><strong>I have read the study information and I consent to participate</strong></label>
+                    </div>
+                </div>
+                
+                <button type="submit" id="signup-btn">Sign Up</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Test server connection
+        function testServer() {
+            console.log('Testing server connection...');
+            fetch('/api/test')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Server response:', data);
+                    alert('Server connection successful!');
+                })
+                .catch(error => {
+                    console.error('Server test failed:', error);
+                    alert('Server connection failed: ' + error.message);
+                });
+        }
+
+        // Load study description
+        document.addEventListener('DOMContentLoaded', function() {
+            const studyDescription = document.getElementById('study-description');
+            
+            fetch('/study_description.md')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to load study description');
+                    }
+                    return response.text();
+                })
+                .then(text => {
+                    if (studyDescription) {
+                        // Convert markdown to HTML
+                        const html = text
+                            .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+                            .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+                            .replace(/^\* (.*$)/gm, '<li>$1</li>')
+                            .replace(/(<li>.*<\/li>)\n/g, '<ul>$1</ul>')
+                            .replace(/^(?!<[h|u])\s*(.+)/gm, '<p>$1</p>');
+                        studyDescription.innerHTML = html;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading study description:', error);
+                    if (studyDescription) {
+                        studyDescription.innerHTML = '<p class="error">Error loading study description. Please refresh the page.</p>';
+                    }
+                });
+        });
+
+        // Sign up handler
+        function signUp(event) {
+            event.preventDefault();
+            
+            const fullName = document.getElementById('full-name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            
+            if (!fullName || !email) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+            
+            const participantId = generateParticipantId();
+            const timestamp = new Date().toISOString();
+            
+            const participantData = {
+                participant_id: participantId,
+                name: fullName,
+                email: email,
+                timestamp_start: timestamp
+            };
+
+            console.log('Sending registration data:', participantData);
+            
+            fetch('/api/register-participant', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(participantData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = `experiment.html?participant=${participantId}`;
+                } else {
+                    alert('Error registering participant: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Registration error:', error);
+                alert('Error registering participant: ' + error.message);
+            });
+        }
+
+        // Generate random participant ID
+        function generateParticipantId() {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < 6; i++) {
+                result += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return result;
+        }
+    </script>
+</body>
+</html> 

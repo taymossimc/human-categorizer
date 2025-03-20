@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message Categorization Study</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 30px;
+            margin-top: 50px;
+        }
+        h1 {
+            color: #333;
+        }
+        .info-box {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            padding: 8px;
+            width: 250px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Message Categorization Study</h1>
+        
+        <div class="info-box">
+            <h2>Welcome to our research study!</h2>
+            <p>In this study, you will be asked to categorize messages that were submitted to an online chatbot.</p>
+            <p>Your participation will help improve chatbot response systems and message categorization algorithms.</p>
+            <p>For more information about this study, please contact: <strong>imc@tucc.ca</strong></p>
+        </div>
+        
+        <div class="form-group">
+            <p>If you have a participant code, please enter it below:</p>
+            <input type="text" id="participant-code" placeholder="Participant code (optional)">
+        </div>
+        
+        <button id="continue-btn" onclick="continueToStudy()">Continue</button>
+    </div>
+
+    <script>
+        function continueToStudy() {
+            const participantCode = document.getElementById('participant-code').value.trim();
+            if (participantCode) {
+                // Redirect to experiment page with the participant code
+                window.location.href = `experiment.html?participant=${participantCode}`;
+            } else {
+                // Redirect to signup page if no code is provided
+                window.location.href = 'signup.html';
+            }
+        }
+    </script>
+</body>
+</html> 
