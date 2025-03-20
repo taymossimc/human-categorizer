@@ -1,8 +1,10 @@
 # Human Categorizer
 
-A web application for human-assisted categorization of chatbot messages. This tool allows researchers to gather human judgments for message classification, helping to improve chatbot response systems and message categorization algorithms.  This version is written for development on your localhost, but of coures it can be easily adapted to run on a Linux-based virtual machine.
+A web application for human-assisted categorization of chatbot messages. This tool allows researchers to gather human judgments for message classification, helping to improve chatbot response systems and message categorization algorithms.  This version is written for development on your localhost, but of course it can be easily adapted to run on a Linux-based virtual machine connected to the open internet.
 
-Our team is providing this under the terms of CC-BY-NC. Which means that you are free to use it for non-commercial purposes. And we'd like credit if you use it or adapt it.
+This was developed by Tay Moss on behalf of the Innovative Ministry Centre, which is part of TUCC. We are a non-profit creating education technology for faith groups, theological higher education, and similar efforts. Learn more about us at our main public projects: https://churchx.ca and https://ecclesia.ai .
+
+Our team is providing this under the terms of CC. It would be cool if you gave us some credit.  
 
 ## Overview
 
